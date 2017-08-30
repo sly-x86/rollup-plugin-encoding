@@ -1,6 +1,7 @@
 const colors = require('colors');
 const enc = require('encoding');
 const fs = require('fs-extra');
+const path = require('path');
 
 function logSuccess(message) {
     console.log(message.green);
@@ -9,6 +10,15 @@ function logSuccess(message) {
 function logError(message) {
     console.log(message.red);
     throw new Error(message);
+}
+
+function ensureDirectoryExists(filePath) {
+    var dirname = path.dirname(filePath);
+    if (fs.existsSync(dirname)) {
+        return true;
+    }
+    ensureDirectoryExists(dirname);
+    fs.mkdirSync(dirname);
 }
 
 module.exports = function encoding(options) {
@@ -38,6 +48,7 @@ module.exports = function encoding(options) {
                     err && logError("Can't read 'src' file: " + src);
 
                     const result = enc.convert(data, toCharset, fromCharset);
+                    ensureDirectoryExists(dest);
                     fs.writeFile(dest, result, (err) => {
                         err && logError("Can't write 'dest' file" + dest);
 
