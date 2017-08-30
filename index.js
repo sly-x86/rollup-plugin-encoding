@@ -21,13 +21,28 @@ function ensureDirectoryExists(filePath) {
     fs.mkdirSync(dirname);
 }
 
-module.exports = function encoding(options) {
+function encode(options) {
+    const fromCharset = options.fromCharset || 'UTF-8';
+    const toCharset = options.toCharset;
+    const src = options.src;
+    const dest = options.dest;
+    const verbose = !!options.verbose;
+
+    fs.readFile(src, (err, data) => {
+        err && logError(`Can't read 'src' file: ${src}`);
+
+        const result = enc.convert(data, toCharset, fromCharset);
+        ensureDirectoryExists(dest);
+        fs.writeFile(dest, result, (err) => {
+            err && logError(`Can't write 'dest' file ${dest}`);
+
+            verbose && logSuccess(`${src} -> ${dest} was seccessfully encoded with ${toCharset}`);
+        });
+    });
+}
+
+module.exports = (options) => {
     const name = 'rollup-plugin-encoding';
-    let fromCharset,
-        toCharset,
-        src,
-        dest,
-        verbose;
 
     if (!Array.isArray(options)) {
         options = [options];
@@ -36,27 +51,7 @@ module.exports = function encoding(options) {
     return {
         name: name,
         onwrite: (object) => {
-
-            for (i in options) {
-                fromCharset = options[i].fromCharset || 'UTF-8';
-                toCharset = options[i].toCharset;
-                src = options[i].src;
-                dest = options[i].dest;
-                verbose = !!options[i].verbose;
-
-                fs.readFile(src, (err, data) => {
-                    err && logError("Can't read 'src' file: " + src);
-
-                    const result = enc.convert(data, toCharset, fromCharset);
-                    ensureDirectoryExists(dest);
-                    fs.writeFile(dest, result, (err) => {
-                        err && logError("Can't write 'dest' file" + dest);
-
-                        verbose && logSuccess(src + ' -> ' + dest + ' was seccessfully encoded with ' + toCharset);
-                    });
-                });
-            }
-
+            options.map(encode);
         }
     };
 }

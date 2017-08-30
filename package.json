@@ -1,6 +1,6 @@
 {
   "name": "rollup-plugin-encoding",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Convert file encoding, build on top of encoding package",
   "main": "index.js",
   "repository": "https://github.com/sly-x86/rollup-plugin-encoding.git",
